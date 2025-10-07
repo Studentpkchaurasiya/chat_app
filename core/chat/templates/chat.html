@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        #top-bar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        #top-bar a {
+            color: #f1f1f1;
+            text-decoration: none;
+            margin-left: 15px;
+        }
+        #chat-container {
+            max-width: 900px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        #recipient-bar {
+            padding: 10px 15px;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        #recipient-bar label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        #recipient-bar input {
+            flex: 1;
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        #recipient-bar button {
+            margin-left: 10px;
+            padding: 6px 12px;
+            border: none;
+            background: #2980b9;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #recipient-bar button:hover {
+            background: #1f6391;
+        }
+        #recipient-display {
+            margin-left: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        #messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .msg {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin: 8px 0;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 14px;
+            position: relative;
+        }
+        .from-me {
+            background: #d1f2eb;
+            margin-left: auto;
+            text-align: right;
+        }
+        .from-other {
+            background: #ecf0f1;
+            margin-right: auto;
+            text-align: left;
+        }
+        .timestamp {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+        }
+        #form {
+            display: flex;
+            padding: 12px;
+            border-top: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+        #form button {
+            margin-left: 10px;
+            padding: 10px 15px;
+            border: none;
+            background: #27ae60;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #form button:hover {
+            background: #1e874b;
+        }
+    </style>
+</head>
+<body>
+    <div id="top-bar">
+        <div>Welcome, {{ request.user.username }}</div>
+        <div><a href="{% url 'logout' %}">Logout</a></div>
+    </div>
+
+    <div id="chat-container">
+        <div id="recipient-bar">
+            <label>Chat with:</label>
+            <input type="text" id="recipient" placeholder="Enter username">
+            <button id="start-chat">Start</button>
+            <span id="recipient-display"></span>
+        </div>
+
+        <div id="messages">
+            {% for msg in messages %}
+                <div class="msg {% if msg.sender == request.user %}from-me{% else %}from-other{% endif %}">
+                    <b>{% if msg.sender == request.user %}You{% else %}{{ msg.sender.username }}{% endif %}:</b>
+                    {{ msg.text }}
+                    <span class="timestamp">{{ msg.timestamp|date:"H:i" }}</span>
+                </div>
+            {% empty %}
+                <p>No messages yet.</p>
+            {% endfor %}
+        </div>
+
+        <form id="form">
+            <input type="text" id="message-input" placeholder="Type a message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script>
+        let socket;
+        let recipient = "";
+
+        function formatTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function connect() {
+            socket = new WebSocket("ws://127.0.0.1:8000/ws/chat/");
+
+            socket.onopen = () => {
+                console.log("Connected to server");
+                socket.send(JSON.stringify({ username: "{{ request.user.username }}" }));
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (!recipient) return;
+
+                if (data.from === recipient || data.from === "{{ request.user.username }}") {
+                    const msgDiv = document.createElement("div");
+                    msgDiv.classList.add("msg");
+                    if (data.from === "{{ request.user.username }}") {
+                        msgDiv.classList.add("from-me");
+                        msgDiv.innerHTML = `<b>You:</b> ${data.message} <span class="timestamp">${formatTime()}</span>`;
+                    } else {
+                        msgDiv.classList.add("from-other");
+                        msgDiv.innerHTML = `<b>${data.from}:</b> ${data.message} <span class="timestamp">${formatTime()}</span>`;
+                    }
+                    document.getElementById("messages").appendChild(msgDiv);
+                    const messagesDiv = document.getElementById("messages");
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+            };
+
+            socket.onclose = () => {
+                console.log("Disconnected");
+            };
+        }
+
+        document.getElementById("start-chat").onclick = () => {
+            recipient = document.getElementById("recipient").value.trim();
+            if (!recipient) return;
+            document.getElementById("recipient-display").innerHTML = `💬 Chatting with <b>${recipient}</b>`;
+        };
+
+        document.getElementById("form").onsubmit = (e) => {
+            e.preventDefault();
+            const message = document.getElementById("message-input").value;
+            if (recipient && message) {
+                socket.send(JSON.stringify({ to: recipient, message: message }));
+
+                const msgDiv = document.createElement("div");
+                msgDiv.classList.add("msg", "from-me");
+                msgDiv.innerHTML = `<b>You:</b> ${message} <span class="timestamp">${formatTime()}</span>`;
+                document.getElementById("messages").appendChild(msgDiv);
+
+                document.getElementById("message-input").value = "";
+                const messagesDiv = document.getElementById("messages");
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        };
+
+        window.onload = connect;
+    </script>
+</body>
+</html>
