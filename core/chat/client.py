@@ -6,7 +6,7 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.patch_stdout import patch_stdout
 
 async def chat_client():
-    uri = "ws://127.0.0.1:8000/ws/chat/"
+    uri = "ws://13.233.131.198:8001/ws/chat/"
     username = input("Enter your username: ")
 
     async with websockets.connect(uri) as websocket:
