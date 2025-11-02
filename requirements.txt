@@ -1,0 +1,17 @@
+# Core Framework
+Django>=4.2,<5.0
+
+# ASGI + WebSocket Support
+channels>=4.0.0
+asgiref>=3.7.0
+
+# Redis as Channel Layer (Highly Recommended)
+channels-redis>=4.1.0
+redis>=5.0.0
+
+# ASGI Server (for running the app)
+daphne>=4.0.0
+
+# Optional but useful
+python-dotenv>=1.0.0    # load .env files
+requests>=2.31.0        # for any HTTP requests
