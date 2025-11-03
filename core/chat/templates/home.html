@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatApp | Welcome</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    h1 {
+      font-size: 42px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    p {
+      font-size: 18px;
+      margin-bottom: 40px;
+      color: #f3f3f3;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    a {
+      text-decoration: none;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    .login-btn {
+      background-color: #5a67d8;
+    }
+
+    .register-btn {
+      background-color: #43cea2;
+    }
+
+    a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💬 ChatApp</h1>
+    <p>Connect with friends and chat in real-time — simple, fast, and secure.</p>
+    <div class="btn-group">
+      <a href="{% url 'login' %}" class="login-btn">Login</a>
+      <a href="{% url 'register' %}" class="register-btn">Register</a>
+    </div>
+  </div>
+
+  <footer>© 2025 ChatApp | Built with ❤️ using Django & WebSockets</footer>
+</body>
+</html>
