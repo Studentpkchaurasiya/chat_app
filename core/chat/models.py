@@ -9,3 +9,8 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender} -> {self.receiver}: {self.text[:30]}"
+
+class Contact(models.Model):
+    user = models.ForeignKey(User, related_name='contacts', on_delete=models.CASCADE)
+    contact_user = models.ForeignKey(User, related_name='added_by', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)

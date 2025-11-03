@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Contacts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 40px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 220px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .contact-list {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .contact {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .contact a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .messages {
+            text-align: center;
+            margin-bottom: 15px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h2>Your Contacts</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="username" placeholder="Enter username to add" required>
+        <button type="submit">Add Contact</button>
+    </form>
+
+    <div class="contact-list">
+        {% if contacts %}
+            {% for contact in contacts %}
+                <div class="contact">
+                    <a href="{% url 'chat' contact.contact_user.username %}">
+                        {{ contact.contact_user.username }}
+                    </a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center; color:#888;">No contacts yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
